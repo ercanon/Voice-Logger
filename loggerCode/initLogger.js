@@ -6,7 +6,13 @@ const {
     Routes,
     MessageFlags
 } = require("discord.js");
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildVoiceStates
+    ]});
+const express = require("express");
 
 /*>--------------- { Commands } ---------------<*/
 client.commands = new Collection();
@@ -23,15 +29,15 @@ for (const file of commandFiles) {
 
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
-(async () => {
-    try {
-        await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body });
-        console.log("📤 Applying command.");
-    }
-    catch (error) {
-        console.error("❌ ERROR applying command.", error);
-    }
-})();
+//(async () => {
+//    try {
+//        await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body });
+//        console.log("📤 Applying command.");
+//    }
+//    catch (error) {
+//        console.error("❌ ERROR applying command.", error);
+//    }
+//})();
 
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isCommand())
@@ -55,16 +61,18 @@ client.on("interactionCreate", async (interaction) => {
     }
 });
 
-///*>--------------- { Guilds } ---------------<*/
-//const VoiceHoracio = require("./voiceHoracio.js");
-//client.on("guildCreate", (guild) =>
-//    new VoiceHoracio(guild));
+/*>--------------- { Bot Initialization } ---------------<*/
+client.once("ready", () => {
+    const app = express();
+    app.use(express.json());
 
-///*>--------------- { Bot Initialization } ---------------<*/
-//client.once("ready", () => {
-//    client.guilds.cache.forEach((guild) =>
-//        new VoiceHoracio(guild, app));
-//    console.log(`✅ Horacio está, ¡sí sí! ¡Conectado, todo listo!`);
-//});
+    app.listen(3000, () => {
+        console.log(`🌍 Port 3000 opened.`);
+    }).on("error", (error) =>
+        console.error(`❌ ERROR opening port 3000.`, error));
+
+    require("./voiceTrigger.js")(client);
+    console.log(`✅ VoiceLogger operative!`);
+});
 
 client.login(process.env.TOKEN);
