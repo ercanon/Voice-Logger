@@ -1,4 +1,5 @@
 const { PermissionFlagsBits } = require("discord.js");
+const msgPattern = /^<@!?&?\d+> #\d+ Session: .+$/
 
 module.exports = (client) => {
     client.on("voiceStateUpdate", async (oldState, newState) => {
@@ -6,7 +7,28 @@ module.exports = (client) => {
         const channel = newState.channel || oldState.channel;
 
         if (oldState.channel && !newState.channel) {
-            console.log(`${oldState.member.user.tag} se ha desconectado del canal de voz ${oldState.channel.name}`);
+            console.log(`${lowRole} ${newState.member.user.tag} se ha desconectado del canal de voz ${channel.name}`);
+
+            let lastMessageID = undefined;
+            for (let i = 0; i < 5; i++) {
+                channel.messages
+                    .fetch({
+                        limit: 20,
+                        before: lastMessageID
+                    })
+                    .then((msgFetched) => {
+                        const msgFound = msgFetched
+                            .find((msg) =>
+                                msg.author.id === client.user.id &&
+                                msg.content.includes(`${oldState.member.user.tag}`))
+
+                        if (msgFound)
+                            return msgFound.delete();
+
+                        lastMessageID = messages.last().id;
+                    })
+                    .catch(console.error);
+            }
         } else if (newState.channel && oldState.channel?.id !== newState.channel.id) {
             const lowRole = guild.roles.cache
                 .filter((role) => {
