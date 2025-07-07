@@ -7,13 +7,13 @@ module.exports = (client) => {
         const channel = newState.channel || oldState.channel;
 
         if (oldState.channel && !newState.channel) {
-            console.log(`${lowRole} ${newState.member.user.tag} se ha desconectado del canal de voz ${channel.name}`);
+            console.log(`${newState.member.user.tag} se ha desconectado del canal de voz ${channel.name}`);
 
             let lastMessageID = undefined;
             for (let i = 0; i < 5; i++) {
                 channel.messages
                     .fetch({
-                        limit: 20,
+                        limit: 10,
                         before: lastMessageID
                     })
                     .then((msgFetched) => {
@@ -25,7 +25,7 @@ module.exports = (client) => {
                         if (msgFound)
                             return msgFound.delete();
 
-                        lastMessageID = messages.last().id;
+                        lastMessageID = msgFetched.last().id;
                     })
                     .catch(console.error);
             }
