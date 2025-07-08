@@ -20,6 +20,11 @@ client.once("ready", () => {
     }).on("error", (error) =>
         console.error(`❌ ERROR opening port 3000.`, error));
 
+    app.get("/", (req, res) => {
+        res.send(`The server is awake.`);
+    });
+
+
     require("./voiceTrigger.js")(client);
     console.log(`✅ VoiceLogger operative!`);
 });
