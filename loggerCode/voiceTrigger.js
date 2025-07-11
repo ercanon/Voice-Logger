@@ -1,35 +1,29 @@
 const { PermissionFlagsBits } = require("discord.js");
-const msgPattern = /^<@!?&?\d+> #\d+ Session: .+$/
 
 module.exports = (client) => {
     client.on("voiceStateUpdate", async (oldState, newState) => {
+        if (oldState.channel?.id === newState.channel?.id)
+            return;
+
         const guild = newState.guild; //Both states the same
-        const channel = newState.channel || oldState.channel;
 
-        if (oldState.channel && !newState.channel) {
-            console.log(`${newState.member.user.tag} se ha desconectado del canal de voz ${channel.name}`);
+        const msgFound = await (oldState.channel || newState.channel).messages.cache.find((msg) =>
+            msg.author.id === client.user.id &&
+            msg.content.includes(newState.member.user.tag));
 
-            let lastMessageID = undefined;
-            for (let i = 0; i < 5; i++) {
-                channel.messages
-                    .fetch({
-                        limit: 10,
-                        before: lastMessageID
-                    })
-                    .then((msgFetched) => {
-                        const msgFound = msgFetched
-                            .find((msg) =>
-                                msg.author.id === client.user.id &&
-                                msg.content.includes(`${oldState.member.user.tag}`))
+        if (msgFound) {
+            console.log(`Deleting msg: ${msgFound}`);
+            msgFound
+                .delete()
+                .catch(console.error);
+        }
+        else
+            console.log(`Message not found in the cache`);
 
-                        if (msgFound)
-                            return msgFound.delete();
-
-                        lastMessageID = msgFetched.last().id;
-                    })
-                    .catch(console.error);
-            }
-        } else if (newState.channel && oldState.channel?.id !== newState.channel.id) {
+        if (oldState.channel && !newState.channel)
+            console.log(`${newState.member.user.tag} se ha desconectado del canal de voz ${oldState.channel.name}`);
+        else if (newState.channel) {
+            const { channel } = newState
             const lowRole = guild.roles.cache
                 .filter((role) => {
                     if (role.id === guild.id || // everyone
