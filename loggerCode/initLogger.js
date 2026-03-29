@@ -17,9 +17,9 @@ client.once("ready", () => {
 
     const port = process.env.PORT || 4000;
     app.listen(port, () => {
-        console.log(`🌍 ¡Horacio ahora atrapa datos! Horacio atento en el puerto ${port}.`);
+        console.log(`🌍 Connected to port ${port}.`);
     }).on("error", (error) =>
-        console.error(`❌ Error atrapando datos.`, error));
+        console.error(`❌ Error:`, error));
 
     app.get("/", (req, res) => {
         res.send(`The server is awake.`);
