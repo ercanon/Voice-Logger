@@ -15,10 +15,11 @@ client.once("ready", () => {
     const app = express();
     app.use(express.json());
 
-    app.listen(3000, () => {
-        console.log(`🌍 Port 3000 opened.`);
+    const port = process.env.PORT || 4000;
+    app.listen(port, () => {
+        console.log(`🌍 ¡Horacio ahora atrapa datos! Horacio atento en el puerto ${port}.`);
     }).on("error", (error) =>
-        console.error(`❌ ERROR opening port 3000.`, error));
+        console.error(`❌ Error atrapando datos.`, error));
 
     app.get("/", (req, res) => {
         res.send(`The server is awake.`);
